@@ -9,7 +9,7 @@ This repository contains a modular pipeline for:
 
 
 ```
-your-project/
+Electrification_in_SSA_countries/
 ├── config.yaml
 ├── data/
 │   └── all_merged_data.csv
