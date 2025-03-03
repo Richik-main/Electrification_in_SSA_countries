@@ -8,6 +8,7 @@ This repository contains a modular pipeline for:
 ## Project Structure
 
 
+```
 your-project/
 ├── config.yaml
 ├── data/
@@ -19,6 +20,7 @@ your-project/
     ├── data_preprocessing.py
     ├── visualization.py
     └── model_training.py
+```
 
 - **config.yaml**: Central place for file paths, columns to drop, invalid placeholder values, and model hyperparameters.
 - **requirements.txt**: Python dependencies for this project.
