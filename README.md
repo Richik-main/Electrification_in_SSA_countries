@@ -32,6 +32,6 @@ your-project/
 
 1. **Clone this repository**:
    ```bash
-   https://github.com/Richik-main/Electrification_in_SSA_countries.git
+   git clone https://github.com/Richik-main/Electrification_in_SSA_countries.git
 
    cd your-project
