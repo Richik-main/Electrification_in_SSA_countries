@@ -1,0 +1,45 @@
+# config.yaml
+
+# File path for the source CSV
+file_path: "data/all_merged_data.csv"
+
+# Columns you wish to drop from the dataset
+columns_to_drop:
+  - "Losses Due to Power Outages (Value)"
+  - "Industry Classification (ISIC Rev. 4 Code)"
+  - "Sales Revenue (Text)"
+  - "Region of the Establishment"
+  - "Sampling Region"
+  - "Industry Classification (Sampling Sector)"
+
+# Values to remove entirely (like placeholders)
+invalid_values: [-9]
+invalid_values2: [-8, -7, 0]
+# KNN imputer configuration
+imputation_neighbors: 5
+
+# Target column for regression
+target_column: 'Sales Revenue'
+
+# Test split ratio and random state
+test_size: 0.2
+random_state: 42
+
+# Feature engineering thresholds
+firm_size_threshold: 500
+age_cutoffs:
+  - 20
+  - 40
+  - 70
+
+# Hyperparameter grids for model training
+model_params:
+  RandomForest:
+    n_estimators: [50, 100, 150]
+    max_depth: [3, 5, 7, 9]
+    min_samples_split: [2, 5, 10]
+  XGBoost:
+    max_depth: [3, 5, 7, 9]
+    learning_rate: [0.01, 0.05, 0.1]
+    n_estimators: [50, 100, 150]
+
