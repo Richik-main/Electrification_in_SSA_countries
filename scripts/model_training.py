@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from sklearn.impute import KNNImputer
 import matplotlib.pyplot as plt
+XGBRegressor.__sklearn_tags__ = lambda self: {"non_deterministic": True}
 
 def train_and_evaluate_models(df, config):
     """
@@ -54,6 +55,7 @@ def train_and_evaluate_models(df, config):
         #"RandomForest": RandomForestRegressor(random_state=random_state),
         "XGBoost": XGBRegressor(random_state=random_state, objective='reg:squarederror')
     }
+    models["XGBoost"]._estimator_type = "regressor"
 
     # -----------------------------
     # 4. Hyperparameter Tuning / Default Fit

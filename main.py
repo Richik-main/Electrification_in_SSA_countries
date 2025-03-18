@@ -22,7 +22,7 @@ def main(config_path="config.yaml"):
     df = preprocess_data(config_path)
 
     # 2. Visualization / EDA
-    generate_all_plots(df)
+    #generate_all_plots(df)
 
     generate_all_statisticalTestand_plots(df)
     # 3. Model Training

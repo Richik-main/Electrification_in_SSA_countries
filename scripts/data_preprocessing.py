@@ -149,7 +149,7 @@ def preprocess_data(config_path="config.yaml"):
     # -----------------------------
     # 3. KNN Imputation for Numeric Columns
     # -----------------------------
-    numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
+    numeric_cols = df.select_dtypes(include=['float64', 'int64']).drop(columns= ['Backup Power Usage (Own/Shared Generator)']).columns
     knn_imputer = KNNImputer(n_neighbors=imputation_neighbors)
     df[numeric_cols] = knn_imputer.fit_transform(df[numeric_cols])
 
@@ -163,17 +163,21 @@ def preprocess_data(config_path="config.yaml"):
     # -----------------------------
     backup_power_target = 'Backup Power Usage (Own/Shared Generator)'
     if backup_power_target in df.columns:
+        # Convert non-missing backup power values to string to treat them as categorical
+        df[backup_power_target] = df[backup_power_target].apply(lambda x: str(x) if pd.notnull(x) else x)
+
         # Use all other columns as predictors
         features = [col for col in df.columns if col != backup_power_target]
 
         # For predictor columns, fill missing values:
         #   - For categorical columns, use the mode.
-        #   - For numeric columns, reapply KNN imputation.
+        #   - For numeric columns, impute individually using KNN imputer.
         for col in features:
             if df[col].dtype == 'object':
-                df[col].fillna(df[col].mode()[0], inplace=True)
+                df[col] = df[col].fillna(df[col].mode()[0])
             else:
-                df[numeric_cols] = knn_imputer.fit_transform(df[numeric_cols])
+                # Impute the numeric column using KNNImputer and flatten the output.
+                df[col] = knn_imputer.fit_transform(df[[col]]).ravel()
 
         # Split data into rows with known and missing backup power values
         train_data = df[df[backup_power_target].notna()].copy()
@@ -192,12 +196,9 @@ def preprocess_data(config_path="config.yaml"):
         X_train = train_data[features]
         y_train = train_data[backup_power_target]
 
-        # If target is categorical, encode it (typically it is numeric)
-        if train_data[backup_power_target].dtype == 'object':
-            target_le = LabelEncoder()
-            y_train = target_le.fit_transform(y_train)
-        else:
-            target_le = None
+        # Since the backup power usage is now a string, encode it as categorical labels.
+        target_le = LabelEncoder()
+        y_train = target_le.fit_transform(y_train)
 
         # Train a KNN classifier (using 5 neighbors) to predict missing backup power usage
         knn_classifier = KNeighborsClassifier(n_neighbors=5)
@@ -207,12 +208,14 @@ def preprocess_data(config_path="config.yaml"):
         X_missing = missing_data[features]
         predicted = knn_classifier.predict(X_missing)
 
-        # Convert predictions back to original labels if necessary
-        if target_le is not None:
-            predicted = target_le.inverse_transform(predicted)
+        # Convert predictions back to original string labels
+        predicted = target_le.inverse_transform(predicted)
 
         # Fill the missing values in the original DataFrame
         df.loc[df[backup_power_target].isna(), backup_power_target] = predicted
+
+        # Convert the backup power usage column back to numeric
+        df[backup_power_target] = pd.to_numeric(df[backup_power_target], errors='coerce')
 
     # -----------------------------
     # 5. Convert Sales Revenue to USD
