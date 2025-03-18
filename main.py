@@ -5,7 +5,7 @@ import yaml
 from scripts.data_preprocessing import preprocess_data
 from scripts.visualization import generate_all_plots
 from scripts.model_training import train_and_evaluate_models
-
+from scripts.stats import generate_all_statisticalTestand_plots
 
 def load_config(config_path="config.yaml"):
     """Utility function to load the config file."""
@@ -24,7 +24,7 @@ def main(config_path="config.yaml"):
     # 2. Visualization / EDA
     generate_all_plots(df)
 
-
+    generate_all_statisticalTestand_plots(df)
     # 3. Model Training
     best_models, results_df = train_and_evaluate_models(df, config)
 

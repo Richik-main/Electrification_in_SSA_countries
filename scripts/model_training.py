@@ -51,7 +51,7 @@ def train_and_evaluate_models(df, config):
     # -----------------------------
     # Changed key from "Random Forest" to "RandomForest" for consistency with YAML
     models = {
-        "RandomForest": RandomForestRegressor(random_state=random_state),
+        #"RandomForest": RandomForestRegressor(random_state=random_state),
         "XGBoost": XGBRegressor(random_state=random_state, objective='reg:squarederror')
     }
 

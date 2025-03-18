@@ -372,6 +372,85 @@ def plot_kde_sales_revenue_by_categorical(df):
         plt.show()
 
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+sns.set(style='whitegrid', palette='Set2')
+plt.rcParams.update({
+    'figure.figsize': (10, 6),
+    'axes.titlesize': 16,
+    'axes.labelsize': 14
+})
+
+
+def plot_pca(df, color_col=None):
+    """
+    Perform a 2D PCA on numeric columns and plot the first two principal components.
+
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        The DataFrame containing your data.
+    color_col : str, optional
+        Name of a column in df by which points will be colored.
+        It should be categorical (or can be treated as such).
+    """
+
+    # 1. Select numeric columns.
+    numeric_df = df.select_dtypes(include=[np.number])
+    numeric_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    # 2. (Optional) Drop rows with any missing values in these numeric columns.
+    #    If you'd rather fill them, replace dropna() with an appropriate fill method.
+    numeric_df = numeric_df.dropna()
+    numeric_df.shape()
+    # 3. Standardize the data (so that each feature has mean=0, std=1).
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(numeric_df.values)
+
+    # 4. Perform PCA with 2 principal components.
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X_scaled)
+
+    # Create a separate DataFrame for the PCA results.
+    pca_df = pd.DataFrame(data=X_pca, columns=['PC1', 'PC2'], index=numeric_df.index)
+
+    # Attach the color column to the PCA DataFrame if provided.
+    if color_col and color_col in df.columns:
+        pca_df[color_col] = df.loc[pca_df.index, color_col]
+
+    # 5. Plot PC1 vs PC2, optionally colored by `color_col`.
+    plt.figure()
+    if color_col and color_col in pca_df.columns:
+        sns.scatterplot(
+            x='PC1',
+            y='PC2',
+            hue=color_col,
+            data=pca_df,
+            alpha=0.8
+        )
+        plt.title(
+            f"PCA (2D) - Colored by {color_col}\n"
+            f"Explained Variance: PC1={pca.explained_variance_ratio_[0]:.2f}, "
+            f"PC2={pca.explained_variance_ratio_[1]:.2f}"
+        )
+        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", title=color_col)
+    else:
+        sns.scatterplot(x='PC1', y='PC2', data=pca_df, alpha=0.8)
+        plt.title(
+            f"PCA (2D)\nExplained Variance: "
+            f"PC1={pca.explained_variance_ratio_[0]:.2f}, "
+            f"PC2={pca.explained_variance_ratio_[1]:.2f}"
+        )
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.tight_layout()
+    plt.show()
+
+
 def generate_all_plots(df):
     """
     Master function to generate all visualizations.
@@ -389,6 +468,7 @@ def generate_all_plots(df):
     # plot_electricity_dependency_vs_outage_impact(df)
     # plot_backup_power_dependency_by_firm_size(df)
     # plot_firm_age_vs_sales_revenue_per_employee(df)
+    plot_pca(df)
     plot_correlation_heatmap(df)
     plot_kde_continuous(df)
     plot_kde_sales_revenue_by_categorical(df)
